@@ -1,7 +1,7 @@
 import numpy as np
 import pulp 
 import math
-def bitratecontrol(Recievers, Senders, bitrate,estimate,lastbuffer,lastrebuffer,type,usercount,error_sum,change):
+def bitratecontrol(Recievers, Senders, bitrate,estimate,lastbuffer,lastrebuffer,type,usercount,error_sum,change,k,j):
     lastbuffer = [[0] * usercount for row in range(usercount)]
     for sender in Senders:
         for reciever in Recievers:
@@ -9,21 +9,25 @@ def bitratecontrol(Recievers, Senders, bitrate,estimate,lastbuffer,lastrebuffer,
                 quantity = 0
                 for frame in reciever.buffer_index[sender.id]:
                     quantity = quantity + sender.static_frame_size[frame]      
-                bufferEST = lastbuffer[sender.id][reciever.id]-(sum(bitrate for bitrate in reciever.bitrate)-estimate[reciever.id])/(usercount-1)*(type)
+                if len(reciever.buffer_index[sender.id])<5:
+                    bufferEST = lastbuffer[sender.id][reciever.id]-(sum(bitrate for bitrate in reciever.bitrate)-estimate[reciever.id])/(usercount-1)*(type)
+                else:
+                    bufferEST = lastbuffer[sender.id][reciever.id]-(sum(bitrate for bitrate in reciever.bitrate)-estimate[reciever.id])/(usercount-1)*(type)
                 if(bufferEST) <= 0:
                     bufferEST = 0
                 #print(quantity-bufferEST)
                 lastbuffer[sender.id][reciever.id] = quantity
-                error_sum[sender.id][reciever.id] = error_sum[sender.id][reciever.id]+(quantity-bufferEST)/(quantity+1+bufferEST)
-                temp=(quantity-bufferEST)/3000+error_sum[sender.id][reciever.id]/3000+change[sender.id]/4
+                error_sum[sender.id][reciever.id] = error_sum[sender.id][reciever.id]+(quantity-bufferEST)
+                temp=k*(quantity-bufferEST)/8000+j*error_sum[sender.id][reciever.id]/40000
                 if(temp<0):
-                    bitrate[sender.id][reciever.id] = bitrate[sender.id][reciever.id]+0.3*temp
+                    bitrate[sender.id][reciever.id] = bitrate[sender.id][reciever.id]+temp
                 if(temp>0):
-                    bitrate[sender.id][reciever.id] = bitrate[sender.id][reciever.id]+0.1*temp
-                if bitrate[sender.id][reciever.id]<0.1:
+                    bitrate[sender.id][reciever.id] = bitrate[sender.id][reciever.id]+temp
+                if bitrate[sender.id][reciever.id] < 0:
                     bitrate[sender.id][reciever.id] = 0.1
+               # print(bitrate[sender.id][reciever.id])
     return bitrate,error_sum,lastbuffer
-def offline_solve(usercount,bandwidth_downlink_est,bandwidth_downlink_est_last,bandwidth_uplink_est,QoEMetrix,Recievers):
+def offline_solve_LP(usercount,bandwidth_downlink_est,bandwidth_downlink_est_last,bandwidth_uplink_est,QoEMetrix,Recievers):
     jitter_direct = []
     for i in range(usercount):
         if bandwidth_downlink_est[i]>bandwidth_downlink_est_last[i]:
@@ -75,9 +79,26 @@ def offline_solve(usercount,bandwidth_downlink_est,bandwidth_downlink_est_last,b
 def estimate(trace_to_estimate):
     sum = 0
     for i in trace_to_estimate:
-        sum = sum + 1/(i+0.001)
+        if i!=0:
+            sum = sum + 1/i
+    #print(sum)        
     harmonic_mean = len(trace_to_estimate)/sum
+    #print(harmonic_mean)
     return harmonic_mean
-        
+def offline_solve(usercount,bandwidth_downlink_est,bandwidth_downlink_est_last,bandwidth_uplink_est,QoEMetrix,Recievers):
+    bitrate = {}
+    for i in range(usercount):
+        bitrate[i] = [0]*usercount
+    for i in range(usercount):
+        for j in range(usercount):
+            if i!=j:
+                bitrate[i][j] = bandwidth_downlink_est[j]*QoEMetrix[i][j][0]/sum(QoEMetrix[k][j][0] for k in range(usercount))*0.8
+            if len(Recievers[j].buffer_index[i])<5:
+                bitrate[i][j] = bitrate[i][j]/2
+            if bitrate[i][j]>bandwidth_uplink_est[i]:
+                bitrate[i][j] = bandwidth_uplink_est[i]
+            #print(bitrate[i][j]*30)
+    return bitrate
+            
 
         

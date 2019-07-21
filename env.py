@@ -133,7 +133,11 @@ class Reciever:
     def play(self):
         for sender in range(self.sendercount):
             if len(self.buffer_index[sender])!=0:
-                self.play_index[sender] = self.buffer_index[sender].pop(0)
+                if len(self.buffer_index[sender])>1:
+                    self.play_index[sender] = self.buffer_index[sender].pop(0)
+                    self.play_index[sender] = self.buffer_index[sender].pop(0)
+                else:
+                    self.play_index[sender] = self.buffer_index[sender].pop(0)
 
             else:
                 self.rebuffer[sender] = self.rebuffer[sender]+1
@@ -162,6 +166,6 @@ class Reciever:
         self.lastrebuffer = rebuffer
         return self.qoe    
     def getQoe(self,id,bitrate):  
-        return self.QoeMetrix[id][0]*bitrate - self.QoeMetrix[id][1]*abs(self.bitrate_history[-1][id]-bitrate) - self.QoeMetrix[id][2]*self.rebuffer[id] - self.QoeMetrix[id][3]*(self.time_index-self.play_index[id])
+        return bitrate
                     
         

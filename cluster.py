@@ -11,8 +11,8 @@ def kMeans(id,bitrate_list,recievers):
             if i<minBitrate:
                 minBitrate = i
     randBitrate = (minBitrate+maxBitrate)/2
-    lastlowerBitrate = (minBitrate + randBitrate)/2
-    lasthigherBitrate = (maxBitrate + randBitrate)/2
+    lastlowerBitrate = minBitrate
+    lasthigherBitrate = maxBitrate
     newlowerBitrate  = 0.0
     newhigherBitrate = 0.0
     new_groupA = []
@@ -21,21 +21,26 @@ def kMeans(id,bitrate_list,recievers):
     new_groupB.clear()
     #print(lasthigherBitrate)
     #print(lastlowerBitrate)
-    while(newlowerBitrate/(0.001+lastlowerBitrate)>1.2 or newlowerBitrate/(0.001+lastlowerBitrate)<0.83):
-        lasthigherBitrate = newhigherBitrate
-        lastlowerBitrate = newlowerBitrate
+    while(newlowerBitrate/(0.001+lastlowerBitrate)>1.3 or newlowerBitrate/(0.001+lastlowerBitrate)<0.8):
+        
         for reciever in recievers:
             if reciever.id != id:
-                if (abs(reciever.getQoe(id,bitrate_list[reciever.id])-reciever.getQoe(id,lastlowerBitrate))<abs(reciever.getQoe(id,bitrate_list[reciever.id])-reciever.getQoe(id,lastlowerBitrate))).all:
+                if (abs(bitrate_list[reciever.id]-lastlowerBitrate)<abs(bitrate_list[reciever.id]-lasthigherBitrate)):
                     new_groupA.append(reciever.id)
                 else:
                     new_groupB.append(reciever.id)
+        lasthigherBitrate = newhigherBitrate
+        lastlowerBitrate = newlowerBitrate
         if(len(new_groupA)*len(new_groupB)!=0):
             newlowerBitrate = sum(bitrate_list[reciever] for reciever in new_groupA)/len(new_groupA)
             newhigherBitrate = sum(bitrate_list[reciever] for reciever in new_groupB)/len(new_groupB)
-        else:
-            newlowerBitrate = (sum(bitrate_list[reciever] for reciever in new_groupA)+sum(bitrate_list[reciever] for reciever in new_groupB))/(len(new_groupA)+len(new_groupB))
-            newhigherBitrate = newlowerBitrate
+        else :
+            if(len(new_groupB)==0):
+                newhigherBitrate = newlowerBitrate
+                newlowerBitrate = (sum(bitrate_list[reciever] for reciever in new_groupA)+sum(bitrate_list[reciever] for reciever in new_groupB))/(len(new_groupA)+len(new_groupB))
+            if(len(new_groupA)==0):
+                newlowerBitrate = newhigherBitrate
+                newhigherBitrate = (sum(bitrate_list[reciever] for reciever in new_groupA)+sum(bitrate_list[reciever] for reciever in new_groupB))/(len(new_groupA)+len(new_groupB))
         #print(lasthigherBitrate)
         #print(newlowerBitrate)
     result = []
