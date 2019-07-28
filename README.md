@@ -16,7 +16,7 @@ You can also check the usage of our simulator here.
 
 ### Traces
 
-In our experiments, we use 2 datasets. One is a Belgium 4G network traces in `traces/Belgium`. The other is a network trace dataset collected in 3 live streaming servers. It is provided by a company we collaborate with, which is in `traces/SJDD`.
+In our experiments, we use 2 datasets. One is a Belgium 4G network traces in `traces/Belgium`. The other is a network trace dataset collected from 3 live streaming servers. It is provided by a company we collaborate with, which is in `traces/SJDD`.
 
 ### Interface
 
