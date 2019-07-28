@@ -1,9 +1,9 @@
-# INFOCOM-Multi-party-Interactive-Live-Video-Streaming
-Multilive is a bitrate control algorithm for multi-party streaming architecture。
+# MultiLive: Adaptive Bitrate Control for Low-delay Multiparty Interactive Live Streaming
+MultiLive is a bitrate control algorithm for multi-party streaming architecture.
 
 ### Simulator
 
-We build a simulator to evaluate our algorithm over this new scenario in `sim/`. As each part of the architecture are established in `sim/env.py`, and our algorithm are described in `sim/algorithm.py` and `sim/cluster.py`.
+We build a simulator to evaluate our algorithm over this new scenario in `sim/`. As each part of the architecture is established in `sim/env.py`, and our algorithm is described in `sim/algorithm.py` and `sim/cluster.py`.
 
 ### Demo
 
@@ -16,7 +16,7 @@ You can also check the usage of our simulator here.
 
 ### traces
 
-In our experiments we use 2 datasets. One is a Belgium 4G network traces in `traces/Belgium`. The oher is a network trace dataset collected in 3 parts of a country collected by a company we collabrate with, in `traces/SJDD`.
+In our experiments, we use 2 datasets. One is a Belgium 4G network traces in `traces/Belgium`. The other is a network trace dataset collected in 3 live streaming servers. It is collected by a company we collabrate with, which is in `traces/SJDD`.
 
 ### Interface
 
